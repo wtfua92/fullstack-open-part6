@@ -1,9 +1,11 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import Filter from "./Filter";
 
 function AnecdoteList({filteredAnecdotes}) {
     return (
         <div>
+            <Filter />
             <h2>Anecdotes</h2>
             {
                 filteredAnecdotes
