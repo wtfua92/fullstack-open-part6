@@ -2,8 +2,18 @@ import React from 'react';
 import {connect} from 'react-redux';
 import Filter from "./Filter";
 import {voteAction} from "../reducers/anecdoteReducer";
+import {setNewNotification, clearNotification} from "../reducers/notificationReducer";
 
-function AnecdoteList({anecdotesToShow, voteAction}) {
+function AnecdoteList({anecdotesToShow, voteAction, setNewNotification, clearNotification}) {
+    const voteHandler = (e, anecdoteId) => {
+        e.preventDefault();
+        voteAction(anecdoteId);
+        const item = anecdotesToShow.find((a) => a.id === anecdoteId);
+        setNewNotification(`You voted for "${item.content}"`, setTimeout(() => {
+            clearNotification();
+        }, 5000));
+    };
+
     return (
         <div>
             <Filter />
@@ -15,7 +25,7 @@ function AnecdoteList({anecdotesToShow, voteAction}) {
                             <div>
                                 {anecdote.content}
                                 <br/>
-                                has {anecdote.votes} <button type="button" onClick={() => voteAction(anecdote.id)}>vote</button>
+                                has {anecdote.votes} <button type="button" onClick={(e) => {voteHandler(e, anecdote.id)}}>vote</button>
                             </div>
                         </div>
                     )
@@ -31,7 +41,9 @@ const mapStateToProps = ({anecdotes, filter}) => {
 };
 
 const mapDispatchToProps = {
-    voteAction
+    voteAction,
+    clearNotification,
+    setNewNotification
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AnecdoteList);

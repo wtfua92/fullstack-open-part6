@@ -9,7 +9,6 @@ function AnecdoteForm({addHandler}) {
         e.target.anecdote.value = '';
     };
 
-
     return (
         <div>
             <h2>create new</h2>
