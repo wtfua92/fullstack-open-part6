@@ -3,13 +3,19 @@ const initialState = {
     timer: null
 };
 
-export const setNewNotification = (message, timer) => ({
-    type: 'SET',
-    data: {
-        message,
-        timer
-    }
-});
+export const setNewNotification = (message, time) => {
+    return (dispatch) => {
+        dispatch({
+            type: 'SET',
+            data: {
+                message,
+                timer: setTimeout(() => {
+                    dispatch(clearNotification);
+                }, time * 1000)
+            }
+        })
+    };
+};
 
 export const clearNotification = () => ({
     type: 'CLEAR',

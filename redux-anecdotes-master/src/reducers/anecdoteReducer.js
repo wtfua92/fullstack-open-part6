@@ -1,54 +1,58 @@
-const anecdotesAtStart = [
-  'If it hurts, do it more often',
-  'Adding manpower to a late software project makes it later!',
-  'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-  'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-  'Premature optimization is the root of all evil.',
-  'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
-];
-
-const getId = () => (100000 * Math.random()).toFixed(0);
-
-const asObject = (anecdote) => {
-  return {
-    content: anecdote,
-    id: getId(),
-    votes: 0
-  }
-};
+import anecdoteService from "../services/anecdoteService";
 
 const initialState =
     {
-      anecdotes: anecdotesAtStart.map(asObject),
+      anecdotes: [],
       totalVotes: 0
     };
 
-export const voteAction = (votedAnecdoteId) => {
-  return {
-    type: 'VOTE',
-    data: {
-      votedAnecdoteId
-    }
-  }
-};
-
-export const addAction = (content) => {
-  return {
-    type: 'ADD',
-    data: {
-      content,
-      id: getId(),
-      votes: 0
-    }
+export const voteAction = (votedAnecdote) => {
+  return async (dispatch) => {
+      const updatedVotedAnecdote = {...votedAnecdote, votes: votedAnecdote.votes + 1};
+      await anecdoteService.vote(updatedVotedAnecdote);
+      dispatch({
+        type: 'VOTE',
+        data: {
+          votedAnecdoteId: updatedVotedAnecdote.id
+        }
+      });
   };
 };
 
-const reducer = (state = initialState, action) => {
-  switch (action.type) {
+export const addAction = (content) => {
+  return async (dispatch) => {
+    const newAnecdote = {
+      content,
+      votes: 0
+    };
+    const newAnecdoteInDB = (await anecdoteService.addNew(newAnecdote)).data;
+
+    dispatch({
+      type: 'ADD',
+      data: {...newAnecdoteInDB}
+    })
+  }
+};
+
+export const initiateApp = () => {
+  return async (dispatch) => {
+    const anecdotes = (await anecdoteService.getAll()).data;
+
+    dispatch({
+      type: 'INIT',
+      data: {
+        anecdotes
+      }
+    });
+  };
+};
+
+const reducer = (state = initialState, {type, data}) => {
+  switch (type) {
     case 'VOTE': {
       const newState = {};
       newState.anecdotes = state.anecdotes.map((a) => {
-        if (a.id === action.data.votedAnecdoteId) {
+        if (a.id === data.votedAnecdoteId) {
           a.votes += 1;
         }
         return a;
@@ -57,7 +61,10 @@ const reducer = (state = initialState, action) => {
       return newState;
     }
     case 'ADD': {
-      return {...state, anecdotes: [...state.anecdotes, action.data]};
+      return {...state, anecdotes: [...state.anecdotes, data]};
+    }
+    case 'INIT': {
+      return {...state, anecdotes: data.anecdotes}
     }
     default:
       return state;

@@ -1,18 +1,19 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {connect} from 'react-redux';
 import Filter from "./Filter";
-import {voteAction} from "../reducers/anecdoteReducer";
+import {voteAction, initiateApp} from "../reducers/anecdoteReducer";
 import {setNewNotification, clearNotification} from "../reducers/notificationReducer";
 
-function AnecdoteList({anecdotesToShow, voteAction, setNewNotification, clearNotification}) {
-    const voteHandler = (e, anecdoteId) => {
+function AnecdoteList({anecdotesToShow, voteAction, setNewNotification, clearNotification, initiateApp}) {
+    const voteHandler = (e, anecdote) => {
         e.preventDefault();
-        voteAction(anecdoteId);
-        const item = anecdotesToShow.find((a) => a.id === anecdoteId);
-        setNewNotification(`You voted for "${item.content}"`, setTimeout(() => {
-            clearNotification();
-        }, 5000));
+        voteAction(anecdote);
+        setNewNotification(`You voted for "${anecdote.content}"`, 5);
     };
+
+    useEffect(() => {
+        initiateApp();
+    }, [initiateApp]);
 
     return (
         <div>
@@ -25,7 +26,7 @@ function AnecdoteList({anecdotesToShow, voteAction, setNewNotification, clearNot
                             <div>
                                 {anecdote.content}
                                 <br/>
-                                has {anecdote.votes} <button type="button" onClick={(e) => {voteHandler(e, anecdote.id)}}>vote</button>
+                                has {anecdote.votes} <button type="button" onClick={(e) => {voteHandler(e, anecdote)}}>vote</button>
                             </div>
                         </div>
                     )
@@ -43,7 +44,8 @@ const mapStateToProps = ({anecdotes, filter}) => {
 const mapDispatchToProps = {
     voteAction,
     clearNotification,
-    setNewNotification
+    setNewNotification,
+    initiateApp
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AnecdoteList);

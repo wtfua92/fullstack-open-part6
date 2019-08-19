@@ -6,7 +6,6 @@ export const setFilter = (filter) => ({
 });
 
 const reducer = (state = initialState, {type, data}) => {
-    console.log(type);
     switch (type) {
         case 'FILTER':
             return data;
